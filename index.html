@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ColorPicker Pro - 专业颜色工具</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <div class="logo">
+        <div class="logo-icon">
+          <span style="background: #ff6b6b;"></span>
+          <span style="background: #4ecdc4;"></span>
+          <span style="background: #45b7d1;"></span>
+        </div>
+        <h1>ColorPicker Pro</h1>
+      </div>
+      <div class="header-actions">
+        <button id="btn-picker" class="btn btn-primary" title="Ctrl+Shift+C">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/>
+            <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+          屏幕取色
+        </button>
+        <button id="btn-always-top" class="btn btn-secondary" title="Ctrl+Shift+T">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+          置顶
+        </button>
+      </div>
+    </header>
+
+    <nav class="tab-nav">
+      <button class="tab-btn active" data-tab="converter">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 2a10 10 0 010 20"/>
+          <path d="M2 12h20"/>
+        </svg>
+        颜色转换
+      </button>
+      <button class="tab-btn" data-tab="palette">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7"/>
+          <rect x="14" y="3" width="7" height="7"/>
+          <rect x="3" y="14" width="7" height="7"/>
+          <rect x="14" y="14" width="7" height="7"/>
+        </svg>
+        调色板
+      </button>
+      <button class="tab-btn" data-tab="contrast">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 18a6 6 0 000-12v12z"/>
+        </svg>
+        对比度
+      </button>
+      <button class="tab-btn" data-tab="gradient">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <path d="M3 15l3.5-3.5 4 4L21 6"/>
+        </svg>
+        渐变色
+      </button>
+      <button class="tab-btn" data-tab="history">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12,6 12,12 16,14"/>
+        </svg>
+        历史记录
+      </button>
+    </nav>
+
+    <main class="tab-content">
+      <section id="tab-converter" class="tab-pane active">
+        <div class="color-preview-section">
+          <div class="color-preview-large" id="color-preview">
+            <div class="color-value-display">
+              <span id="current-hex">#3498DB</span>
+            </div>
+          </div>
+          <div class="color-inputs">
+            <div class="input-group hex-input">
+              <label>HEX</label>
+              <div class="input-with-btn">
+                <input type="text" id="input-hex" value="#3498DB" maxlength="7">
+                <button class="btn-copy" data-copy="hex" title="复制">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="rgb-inputs">
+              <div class="input-group">
+                <label>R</label>
+                <input type="number" id="input-r" value="52" min="0" max="255">
+              </div>
+              <div class="input-group">
+                <label>G</label>
+                <input type="number" id="input-g" value="152" min="0" max="255">
+              </div>
+              <div class="input-group">
+                <label>B</label>
+                <input type="number" id="input-b" value="219" min="0" max="255">
+              </div>
+            </div>
+            <div class="hsl-inputs">
+              <div class="input-group">
+                <label>H</label>
+                <div class="input-with-suffix">
+                  <input type="number" id="input-h" value="204" min="0" max="360">
+                  <span class="suffix">°</span>
+                </div>
+              </div>
+              <div class="input-group">
+                <label>S</label>
+                <div class="input-with-suffix">
+                  <input type="number" id="input-s" value="70" min="0" max="100">
+                  <span class="suffix">%</span>
+                </div>
+              </div>
+              <div class="input-group">
+                <label>L</label>
+                <div class="input-with-suffix">
+                  <input type="number" id="input-l" value="53" min="0" max="100">
+                  <span class="suffix">%</span>
+                </div>
+              </div>
+            </div>
+            <div class="color-sliders">
+              <div class="slider-group">
+                <label>色相</label>
+                <input type="range" id="slider-h" min="0" max="360" value="204" class="hue-slider">
+              </div>
+              <div class="slider-group">
+                <label>饱和度</label>
+                <input type="range" id="slider-s" min="0" max="100" value="70">
+              </div>
+              <div class="slider-group">
+                <label>亮度</label>
+                <input type="range" id="slider-l" min="0" max="100" value="53">
+              </div>
+              <div class="slider-group">
+                <label>透明度</label>
+                <input type="range" id="slider-a" min="0" max="100" value="100">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="quick-actions">
+          <button class="btn btn-outline" id="btn-add-palette">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+            添加到调色板
+          </button>
+          <button class="btn btn-outline" id="btn-random">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="16,3 21,3 21,8"/>
+              <line x1="4" y1="20" x2="21" y2="3"/>
+              <polyline points="21,16 21,21 16,21"/>
+              <line x1="15" y1="15" x2="21" y2="21"/>
+              <line x1="4" y1="4" x2="9" y2="9"/>
+            </svg>
+            随机颜色
+          </button>
+          <button class="btn btn-outline" id="btn-invert">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 2a10 10 0 100 20"/>
+            </svg>
+            反色
+          </button>
+          <button class="btn btn-outline" id="btn-complement">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+            </svg>
+            互补色
+          </button>
+        </div>
+      </section>
+
+      <section id="tab-palette" class="tab-pane">
+        <div class="palette-header">
+          <div class="palette-actions">
+            <button class="btn btn-primary" id="btn-import-palette">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                <polyline points="7,10 12,15 17,10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              导入
+            </button>
+            <button class="btn btn-secondary" id="btn-export-palette">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                <polyline points="7,10 12,15 17,10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              导出
+            </button>
+            <button class="btn btn-danger" id="btn-clear-palette">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3,6 5,6 21,6"/>
+                <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+              </svg>
+              清空
+            </button>
+          </div>
+          <input type="file" id="file-import" accept=".json" style="display: none;">
+        </div>
+        <div class="palette-grid" id="palette-grid">
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="3" y="3" width="7" height="7"/>
+              <rect x="14" y="3" width="7" height="7"/>
+              <rect x="3" y="14" width="7" height="7"/>
+              <rect x="14" y="14" width="7" height="7"/>
+            </svg>
+            <p>调色板为空</p>
+            <span>使用"添加到调色板"保存您喜欢的颜色</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="tab-contrast" class="tab-pane">
+        <div class="contrast-section">
+          <div class="contrast-colors">
+            <div class="contrast-color-input">
+              <label>前景色（文字）</label>
+              <div class="color-selector">
+                <div class="color-preview-small" id="contrast-fg-preview" style="background: #ffffff;"></div>
+                <input type="text" id="contrast-fg" value="#FFFFFF" maxlength="7">
+                <button class="btn btn-small" id="btn-pick-fg">选取</button>
+              </div>
+            </div>
+            <div class="swap-btn" id="btn-swap-colors" title="交换颜色">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="7,10 4,13 1,10"/>
+                <path d="M3 5v14"/>
+                <polyline points="17,2 20,5 17,8"/>
+                <path d="M21 5v14"/>
+              </svg>
+            </div>
+            <div class="contrast-color-input">
+              <label>背景色</label>
+              <div class="color-selector">
+                <div class="color-preview-small" id="contrast-bg-preview" style="background: #3498db;"></div>
+                <input type="text" id="contrast-bg" value="#3498DB" maxlength="7">
+                <button class="btn btn-small" id="btn-pick-bg">选取</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="contrast-preview">
+            <div class="preview-card" id="contrast-preview-card">
+              <h3 class="preview-title">示例文字标题</h3>
+              <p class="preview-text">这是一段用于测试对比度的示例文本。良好的对比度可以确保内容的可读性，让所有用户都能轻松阅读您的内容。</p>
+              <button class="preview-btn">了解更多</button>
+            </div>
+          </div>
+
+          <div class="contrast-results">
+            <div class="result-card">
+              <div class="result-label">对比度比值</div>
+              <div class="result-value" id="contrast-ratio">4.53:1</div>
+            </div>
+            <div class="result-card">
+              <div class="result-label">AA 级（普通文本）</div>
+              <div class="result-grade pass" id="contrast-aa">✓ 通过</div>
+            </div>
+            <div class="result-card">
+              <div class="result-label">AA 级（大文本）</div>
+              <div class="result-grade pass" id="contrast-aa-large">✓ 通过</div>
+            </div>
+            <div class="result-card">
+              <div class="result-label">AAA 级（普通文本）</div>
+              <div class="result-grade fail" id="contrast-aaa">✗ 未通过</div>
+            </div>
+            <div class="result-card">
+              <div class="result-label">AAA 级（大文本）</div>
+              <div class="result-grade pass" id="contrast-aaa-large">✓ 通过</div>
+            </div>
+          </div>
+
+          <div class="contrast-suggestions">
+            <h4>WCAG 2.1 标准建议</h4>
+            <ul>
+              <li>普通文本需要至少 <strong>4.5:1</strong> 的对比度（AA 级）</li>
+              <li>大文本（18pt+ 或 14pt+ 粗体）需要至少 <strong>3:1</strong> 的对比度（AA 级）</li>
+              <li>AAA 级要求普通文本 <strong>7:1</strong>，大文本 <strong>4.5:1</strong></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="tab-gradient" class="tab-pane">
+        <div class="gradient-controls">
+          <div class="gradient-type">
+            <label>渐变类型</label>
+            <div class="type-btns">
+              <button class="type-btn active" data-type="linear">线性渐变</button>
+              <button class="type-btn" data-type="radial">径向渐变</button>
+            </div>
+          </div>
+          <div class="gradient-angle" id="angle-control">
+            <label>角度</label>
+            <div class="angle-selector">
+              <input type="range" id="gradient-angle" min="0" max="360" value="90">
+              <span id="angle-value">90°</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="gradient-preview" id="gradient-preview">
+          <div class="gradient-preview-box" id="gradient-preview-box"></div>
+          <div class="gradient-stops" id="gradient-stops">
+            <div class="color-stop" data-index="0">
+              <input type="color" value="#667eea">
+              <input type="range" min="0" max="100" value="0" class="stop-position">
+            </div>
+            <div class="color-stop" data-index="1">
+              <input type="color" value="#764ba2">
+              <input type="range" min="0" max="100" value="100" class="stop-position">
+            </div>
+          </div>
+          <div class="stop-actions">
+            <button class="btn btn-small" id="btn-add-stop">+ 添加色标</button>
+            <button class="btn btn-small btn-danger" id="btn-remove-stop">− 删除色标</button>
+          </div>
+        </div>
+
+        <div class="gradient-output">
+          <label>CSS 代码</label>
+          <div class="code-block">
+            <pre id="gradient-code">linear-gradient(90deg, #667eea 0%, #764ba2 100%)</pre>
+            <button class="btn-copy" data-copy="gradient" title="复制">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2"/>
+                <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="gradient-presets">
+          <label>预设渐变</label>
+          <div class="preset-grid" id="preset-grid">
+            <div class="preset-item" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);" data-colors="#667eea,#764ba2" data-angle="135"></div>
+            <div class="preset-item" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);" data-colors="#f093fb,#f5576c" data-angle="135"></div>
+            <div class="preset-item" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);" data-colors="#4facfe,#00f2fe" data-angle="135"></div>
+            <div class="preset-item" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);" data-colors="#43e97b,#38f9d7" data-angle="135"></div>
+            <div class="preset-item" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);" data-colors="#fa709a,#fee140" data-angle="135"></div>
+            <div class="preset-item" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);" data-colors="#a8edea,#fed6e3" data-angle="135"></div>
+            <div class="preset-item" style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);" data-colors="#ff9a9e,#fecfef" data-angle="135"></div>
+            <div class="preset-item" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);" data-colors="#ffecd2,#fcb69f" data-angle="135"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="tab-history" class="tab-pane">
+        <div class="history-header">
+          <h3>最近取色记录（最多20条）</h3>
+          <button class="btn btn-danger btn-small" id="btn-clear-history">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3,6 5,6 21,6"/>
+              <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+            </svg>
+            清空历史
+          </button>
+        </div>
+        <div class="history-list" id="history-list">
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12,6 12,12 16,14"/>
+            </svg>
+            <p>暂无历史记录</p>
+            <span>使用屏幕取色功能后，颜色会自动保存在这里</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>屏幕取色器</title>
+  <link rel="stylesheet" href="picker.css">
+</head>
+<body>
+  <div class="picker-overlay" id="picker-overlay">
+    <canvas id="screen-canvas"></canvas>
+    <div class="magnifier" id="magnifier">
+      <canvas id="magnifier-canvas" width="200" height="200"></canvas>
+      <div class="magnifier-crosshair"></div>
+      <div class="magnifier-info">
+        <div class="color-swatch" id="color-swatch"></div>
+        <div class="color-info">
+          <div class="color-hex" id="color-hex">#FFFFFF</div>
+          <div class="color-rgb" id="color-rgb">RGB(255, 255, 255)</div>
+          <div class="mouse-pos" id="mouse-pos">X: 0, Y: 0</div>
+        </div>
+      </div>
+    </div>
+    <div class="picker-instructions">
+      <span><kbd>点击</kbd> 选取颜色</span>
+      <span><kbd>ESC</kbd> 取消</span>
+      <span><kbd>方向键</kbd> 微调位置</span>
+    </div>
+  </div>
+  <script src="picker.js"></script>
+</body>
+</html>

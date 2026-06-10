@@ -1,0 +1,38 @@
+{
+  "name": "color-picker-pro",
+  "version": "1.0.0",
+  "description": "专业颜色选取与转换工具",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build": "electron-builder",
+    "build:mac": "electron-builder --mac",
+    "build:win": "electron-builder --win",
+    "build:linux": "electron-builder --linux"
+  },
+  "keywords": ["color-picker", "electron", "color-converter"],
+  "author": "ColorPicker Pro",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "dependencies": {
+    "electron-store": "^8.1.0"
+  },
+  "build": {
+    "appId": "com.colorpicker.pro",
+    "productName": "ColorPicker Pro",
+    "mac": {
+      "category": "public.app-category.graphics-design",
+      "target": ["dmg", "zip"]
+    },
+    "win": {
+      "target": ["nsis", "portable"]
+    },
+    "linux": {
+      "target": ["deb", "AppImage"]
+    }
+  }
+}
