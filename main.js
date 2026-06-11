@@ -158,14 +158,16 @@ function registerShortcuts() {
   });
 }
 
-function startColorPicker() {
+async function startColorPicker() {
   if (pickerWindow) {
     pickerWindow.close();
     pickerWindow = null;
     return;
   }
 
-  const { width, height } = screen.getPrimaryDisplay().bounds;
+  const primaryDisplay = screen.getPrimaryDisplay();
+  const { width, height } = primaryDisplay.bounds;
+  const scaleFactor = primaryDisplay.scaleFactor || 1;
   
   pickerWindow = new BrowserWindow({
     width: width,
@@ -179,27 +181,36 @@ function startColorPicker() {
     resizable: false,
     movable: false,
     fullscreenable: false,
+    hasShadow: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
-      contextIsolation: true
+      contextIsolation: true,
+      backgroundThrottling: false
     }
   });
 
   pickerWindow.setIgnoreMouseEvents(false);
-  pickerWindow.loadFile('picker.html');
+  
+  const imageData = await captureScreen();
+  screenCapture = imageData;
+  
+  await pickerWindow.loadFile('picker.html');
+  
+  pickerWindow.webContents.once('did-finish-load', () => {
+    if (pickerWindow && imageData) {
+      setTimeout(() => {
+        if (pickerWindow) {
+          pickerWindow.webContents.send('screen-captured', imageData);
+        }
+      }, 100);
+    }
+  });
 
   pickerWindow.on('closed', () => {
     pickerWindow = null;
     if (mainWindow) {
       mainWindow.webContents.send('picker-closed');
-    }
-  });
-
-  captureScreen().then((imageData) => {
-    screenCapture = imageData;
-    if (pickerWindow) {
-      pickerWindow.webContents.send('screen-captured', imageData);
     }
   });
 }

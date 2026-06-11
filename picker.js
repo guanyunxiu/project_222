@@ -1,5 +1,5 @@
 const screenCanvas = document.getElementById('screen-canvas');
-const screenCtx = screenCanvas.getContext('2d');
+const screenCtx = screenCanvas.getContext('2d', { willReadFrequently: true });
 const magnifierCanvas = document.getElementById('magnifier-canvas');
 const magnifierCtx = magnifierCanvas.getContext('2d');
 const magnifier = document.getElementById('magnifier');
@@ -14,7 +14,6 @@ const MAGNIFY_SIZE = 200;
 const SAMPLE_SIZE = MAGNIFY_SIZE / MAGNIFY_ZOOM;
 
 let screenImage = null;
-let screenData = null;
 let screenWidth = 0;
 let screenHeight = 0;
 let displayWidth = 0;
@@ -23,16 +22,13 @@ let mouseX = 0;
 let mouseY = 0;
 let currentColor = '#ffffff';
 let selectedFor = null;
+let isImageLoaded = false;
 
 function init() {
   window.electronAPI.onScreenCaptured((data) => {
     if (data) {
       loadScreenImage(data);
     }
-  });
-
-  window.electronAPI.onColorSelected((color) => {
-    console.log('Color selected:', color);
   });
 
   document.addEventListener('mousemove', handleMouseMove);
@@ -45,23 +41,27 @@ function init() {
 
 function loadScreenImage(data) {
   const img = new Image();
+  img.crossOrigin = 'anonymous';
   img.onload = () => {
     screenImage = img;
-    screenWidth = data.width;
-    screenHeight = data.height;
+    screenWidth = img.naturalWidth;
+    screenHeight = img.naturalHeight;
     displayWidth = data.displayWidth || window.screen.width;
     displayHeight = data.displayHeight || window.screen.height;
 
     screenCanvas.width = displayWidth;
     screenCanvas.height = displayHeight;
+    
+    screenCtx.imageSmoothingEnabled = false;
     screenCtx.drawImage(img, 0, 0, displayWidth, displayHeight);
-
-    const tempCanvas = document.createElement('canvas');
-    tempCanvas.width = screenWidth;
-    tempCanvas.height = screenHeight;
-    const tempCtx = tempCanvas.getContext('2d');
-    tempCtx.drawImage(img, 0, 0);
-    screenData = tempCtx.getImageData(0, 0, screenWidth, screenHeight);
+    
+    isImageLoaded = true;
+    
+    updateMagnifier();
+    updateColorInfo();
+  };
+  img.onerror = (e) => {
+    console.error('Failed to load screen image:', e);
   };
   img.src = data.dataUrl;
 }
@@ -71,8 +71,10 @@ function handleMouseMove(e) {
   mouseY = e.clientY;
 
   updateMagnifierPosition();
-  updateMagnifier();
-  updateColorInfo();
+  if (isImageLoaded) {
+    updateMagnifier();
+    updateColorInfo();
+  }
 }
 
 function updateMagnifierPosition() {
@@ -95,61 +97,72 @@ function updateMagnifierPosition() {
 }
 
 function updateMagnifier() {
-  if (!screenData) return;
-
-  const scaleX = screenWidth / displayWidth;
-  const scaleY = screenHeight / displayHeight;
-
-  const screenPx = Math.floor(mouseX * scaleX);
-  const screenPy = Math.floor(mouseY * scaleY);
+  if (!isImageLoaded) return;
 
   const sampleHalf = SAMPLE_SIZE / 2;
-  const srcX = Math.max(0, Math.min(screenWidth - SAMPLE_SIZE, screenPx - sampleHalf));
-  const srcY = Math.max(0, Math.min(screenHeight - SAMPLE_SIZE, screenPy - sampleHalf));
+  const srcX = Math.max(0, Math.min(displayWidth - SAMPLE_SIZE, mouseX - sampleHalf));
+  const srcY = Math.max(0, Math.min(displayHeight - SAMPLE_SIZE, mouseY - sampleHalf));
 
   magnifierCtx.clearRect(0, 0, MAGNIFY_SIZE, MAGNIFY_SIZE);
   magnifierCtx.imageSmoothingEnabled = false;
-  magnifierCtx.drawImage(
-    screenData,
-    srcX, srcY, SAMPLE_SIZE, SAMPLE_SIZE,
-    0, 0, MAGNIFY_SIZE, MAGNIFY_SIZE
-  );
+  
+  try {
+    magnifierCtx.drawImage(
+      screenCanvas,
+      srcX, srcY, SAMPLE_SIZE, SAMPLE_SIZE,
+      0, 0, MAGNIFY_SIZE, MAGNIFY_SIZE
+    );
+  } catch (e) {
+    console.error('Magnifier draw error:', e);
+  }
 
-  magnifierCtx.strokeStyle = 'rgba(99, 102, 241, 0.8)';
-  magnifierCtx.lineWidth = 1;
+  magnifierCtx.strokeStyle = 'rgba(99, 102, 241, 1)';
+  magnifierCtx.lineWidth = 2;
   magnifierCtx.strokeRect(
     (MAGNIFY_SIZE - MAGNIFY_ZOOM) / 2,
     (MAGNIFY_SIZE - MAGNIFY_ZOOM) / 2,
     MAGNIFY_ZOOM,
     MAGNIFY_ZOOM
   );
+
+  magnifierCtx.strokeStyle = 'rgba(99, 102, 241, 0.4)';
+  magnifierCtx.lineWidth = 1;
+  magnifierCtx.beginPath();
+  magnifierCtx.moveTo(MAGNIFY_SIZE / 2, 0);
+  magnifierCtx.lineTo(MAGNIFY_SIZE / 2, MAGNIFY_SIZE);
+  magnifierCtx.moveTo(0, MAGNIFY_SIZE / 2);
+  magnifierCtx.lineTo(MAGNIFY_SIZE, MAGNIFY_SIZE / 2);
+  magnifierCtx.stroke();
 }
 
 function updateColorInfo() {
-  if (!screenData) return;
+  if (!isImageLoaded) return;
 
-  const scaleX = screenWidth / displayWidth;
-  const scaleY = screenHeight / displayHeight;
+  try {
+    const pixelData = screenCtx.getImageData(
+      Math.max(0, Math.min(displayWidth - 1, mouseX)),
+      Math.max(0, Math.min(displayHeight - 1, mouseY)),
+      1, 1
+    ).data;
 
-  const screenPx = Math.floor(mouseX * scaleX);
-  const screenPy = Math.floor(mouseY * scaleY);
+    const r = pixelData[0];
+    const g = pixelData[1];
+    const b = pixelData[2];
 
-  const pixelIndex = (screenPy * screenWidth + screenPx) * 4;
-  const r = screenData.data[pixelIndex];
-  const g = screenData.data[pixelIndex + 1];
-  const b = screenData.data[pixelIndex + 2];
+    currentColor = rgbToHex(r, g, b);
 
-  currentColor = rgbToHex(r, g, b);
-
-  colorSwatch.style.setProperty('--swatch-color', currentColor);
-  colorHexEl.textContent = currentColor.toUpperCase();
-  colorRgbEl.textContent = `RGB(${r}, ${g}, ${b})`;
-  mousePosEl.textContent = `X: ${mouseX}, Y: ${mouseY}`;
+    colorSwatch.style.setProperty('--swatch-color', currentColor);
+    colorHexEl.textContent = currentColor.toUpperCase();
+    colorRgbEl.textContent = `RGB(${r}, ${g}, ${b})`;
+    mousePosEl.textContent = `X: ${mouseX}, Y: ${mouseY}`;
+  } catch (e) {
+    console.error('Pixel read error:', e);
+  }
 }
 
 function rgbToHex(r, g, b) {
   return '#' + [r, g, b].map(x => {
-    const hex = x.toString(16);
+    const hex = Math.round(x).toString(16);
     return hex.length === 1 ? '0' + hex : hex;
   }).join('');
 }

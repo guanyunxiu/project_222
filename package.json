@@ -4,8 +4,8 @@
   "description": "专业颜色选取与转换工具",
   "main": "main.js",
   "scripts": {
-    "start": "electron .",
-    "dev": "electron . --dev",
+    "start": "electron . --no-sandbox --user-data-dir=./.electron-user-data",
+    "dev": "electron . --no-sandbox --user-data-dir=./.electron-user-data --dev",
     "build": "electron-builder",
     "build:mac": "electron-builder --mac",
     "build:win": "electron-builder --win",
